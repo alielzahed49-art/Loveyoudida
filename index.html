@@ -231,6 +231,66 @@
     font-size:14px;
     opacity:0.7;
   }
+
+  #game2Toggle{
+    margin-top:16px;
+    background:#fff;
+    color: var(--pink-dark);
+    border: 2px solid var(--pink-deep);
+    border-radius:999px;
+    padding:12px 28px;
+    font-size:15px;
+    font-weight:600;
+    cursor:pointer;
+    transition: transform .15s ease;
+  }
+  #game2Toggle:hover{ transform: scale(1.05); }
+
+  #game2Section{
+    margin-top:26px;
+    max-width:520px;
+    width:100%;
+  }
+  #startCatch{
+    background: linear-gradient(135deg, var(--pink-deep), var(--pink-dark));
+    color:#fff;
+    border:none;
+    border-radius:999px;
+    padding:12px 28px;
+    font-size:15px;
+    font-weight:600;
+    cursor:pointer;
+    margin-bottom:14px;
+  }
+  #catchArea{
+    position:relative;
+    width:100%;
+    height:280px;
+    background:var(--cream);
+    border:1px solid #ffd6e0;
+    border-radius:20px;
+    overflow:hidden;
+  }
+  .falling-heart{
+    position:absolute;
+    top:-40px;
+    font-size:28px;
+    cursor:pointer;
+    user-select:none;
+    animation-name: fall;
+    animation-timing-function: linear;
+    animation-fill-mode: forwards;
+  }
+  @keyframes fall{
+    from{ transform: translateY(0); }
+    to{ transform: translateY(320px); }
+  }
+  #catchStatus{
+    margin-top:12px;
+    font-size:15px;
+    font-weight:600;
+    color: var(--pink-dark);
+  }
 </style>
 </head>
 <body>
@@ -267,6 +327,15 @@
     <div id="cardsGrid"></div>
     <p id="gameProgress"></p>
   </div>
+
+  <button id="game2Toggle">💗 لعبة تانية؟</button>
+
+  <div id="game2Section" class="hidden">
+    <p class="game-title">امسكي أكبر عدد قلوب قبل ما الوقت يخلص 🥹</p>
+    <button id="startCatch">ابدأي 💗</button>
+    <div id="catchArea"></div>
+    <p id="catchStatus"></p>
+  </div>
 </div>
 
 <script>
@@ -295,6 +364,7 @@
     'ليه بتهربي؟ 👀',
     'يا ديدا 🥹',
     'يروحيييي 😭',
+    'ياخرا ليههه💔 😭😭',
     'مش هتقدري تهربي أكتر من كده 😏',
     'يا كلبتييي 😡',
     'يلا بس دوسي نعم 🥺',
@@ -398,15 +468,15 @@
 
   // ---- ميني جيم: كروت أسباب حبي ليها ----
   const reasons = [
-    'ضحكتك بتنسيني أي حاجة تعبانة فيها 🥹',
-    'حسيت معاكي بأمان مكنتش حاسس بيه قبل كده 💗',
-    'كل رسالة منك بتفرحني بجد مهما كان يومي تقيل 🫶',
-    'بتفهميني من غير ما أشرح 🥹💗',
-    'قلبي بيدق بشكل مختلف لما اسمك يظهر 😭',
-    'انتي أول حاجة بفكر فيها لما أصحى 💗',
-    'معاكي بحس إني أحسن نسخة مني 🥹',
-    'اسبوعين معاكي أحسن من سنين من غيرك 💗',
-    'مستني أي فرصة اكلمك فيها، ولو دقيقة 🫶'
+    'بحبك يا كوتي بجد مش عارف اوصفلك اد ايه',
+    'ديدا دي اتعلقت فيها موت والله',
+    'روحي انتي مش بس حبيبتي',
+    'دلوعتي اللي مهما زعلت بترجعلها في ثانية',
+    'قلبي بيهدا لما بسمع صوتك بس',
+    'ديدا بجد اتعلقت فيها اوي واتعلقت موت',
+    'يا كوتي انتي حاجة تانية خالص عني كل الناس',
+    'روحي عمري ما حسيت بالراحة دي مع حد قبلك',
+    'دلوعتي يا رب محدش ياخدك مني'
   ];
 
   const gameToggle = document.getElementById('gameToggle');
@@ -455,6 +525,75 @@
     gameToggle.textContent = gameSection.classList.contains('hidden')
       ? '🎮 عايزة تلعبي معايا؟'
       : '🙈 اخفي اللعبة';
+  });
+
+  // ---- ميني جيم 2: اصطياد القلوب ----
+  const game2Toggle = document.getElementById('game2Toggle');
+  const game2Section = document.getElementById('game2Section');
+  const startCatch = document.getElementById('startCatch');
+  const catchArea = document.getElementById('catchArea');
+  const catchStatus = document.getElementById('catchStatus');
+
+  let catchScore = 0;
+  let catchTimeLeft = 20;
+  let catchTimerId = null;
+  let spawnTimerId = null;
+  let catchRunning = false;
+
+  game2Toggle.addEventListener('click', function(){
+    game2Section.classList.toggle('hidden');
+    game2Toggle.textContent = game2Section.classList.contains('hidden')
+      ? '💗 لعبة تانية؟'
+      : '🙈 اخفي اللعبة';
+  });
+
+  function spawnHeart(){
+    const heart = document.createElement('div');
+    heart.className = 'falling-heart';
+    heart.textContent = ['💗','💕','💓','🩷'][Math.floor(Math.random()*4)];
+    const areaWidth = catchArea.clientWidth;
+    heart.style.left = Math.max(0, Math.random()*(areaWidth-28)) + 'px';
+    const duration = 2.4 + Math.random()*1.6;
+    heart.style.animationDuration = duration + 's';
+
+    heart.addEventListener('click', function(){
+      if(!catchRunning) return;
+      catchScore++;
+      catchStatus.textContent = `النقط: ${catchScore} 💗`;
+      heart.remove();
+    });
+    heart.addEventListener('animationend', function(){
+      heart.remove();
+    });
+    catchArea.appendChild(heart);
+  }
+
+  startCatch.addEventListener('click', function(){
+    if(catchRunning) return;
+    catchRunning = true;
+    catchScore = 0;
+    catchTimeLeft = 20;
+    catchArea.innerHTML = '';
+    catchStatus.textContent = `النقط: 0 💗 | الوقت: ${catchTimeLeft}`;
+    startCatch.disabled = true;
+
+    spawnTimerId = setInterval(spawnHeart, 550);
+    catchTimerId = setInterval(function(){
+      catchTimeLeft--;
+      catchStatus.textContent = `النقط: ${catchScore} 💗 | الوقت: ${catchTimeLeft}`;
+      if(catchTimeLeft <= 0){
+        clearInterval(catchTimerId);
+        clearInterval(spawnTimerId);
+        catchRunning = false;
+        startCatch.disabled = false;
+        catchArea.innerHTML = '';
+        let finalMsg = `خلصتي بـ ${catchScore} قلب 💗`;
+        if(catchScore > 10) finalMsg += ' شطورتيييييي امواح 😘💗';
+        if(catchScore >= 15) finalMsg += ' وده عدد القلوب اللي بحبك بيها بالظبط يا ديدا 🥹';
+        else finalMsg += ' يلا كمان مرة يا كوتي 🥹';
+        catchStatus.textContent = finalMsg;
+      }
+    }, 1000);
   });
 </script>
 
