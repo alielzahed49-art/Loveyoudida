@@ -1,0 +1,152 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>I miss you</title>
+<style>
+  :root{
+    --pink-bg: #fff0f3;
+    --pink-deep: #ff8fab;
+    --pink-dark: #e05780;
+    --cream: #fffaf5;
+    --text: #5c3a45;
+  }
+  *{box-sizing:border-box;margin:0;padding:0;}
+  html,body{
+    height:100%;
+    font-family:'Segoe UI', Tahoma, sans-serif;
+    background: radial-gradient(circle at 30% 20%, #ffe3ea, var(--pink-bg) 60%);
+    overflow:hidden;
+    color:var(--text);
+  }
+
+  /* خلفية قلوب طايرة */
+  #hearts{
+    position:fixed;inset:0;pointer-events:none;z-index:0;
+  }
+  .heart{
+    position:absolute;
+    opacity:0.45;
+    animation: float 9s linear infinite;
+    color: var(--pink-deep);
+  }
+  @keyframes float{
+    0%{ transform: translateY(0) rotate(0deg); opacity:0.5;}
+    100%{ transform: translateY(-110vh) rotate(360deg); opacity:0;}
+  }
+
+  /* الصفحة الرئيسية */
+  .page{
+    position:relative;
+    z-index:2;
+    display:flex;
+    flex-direction:column;
+    align-items:center;
+    justify-content:center;
+    min-height:100vh;
+    text-align:center;
+    padding:32px 20px;
+  }
+
+  /* الرسالة */
+  .card{
+    background: var(--cream);
+    border: 1px solid #ffd6e0;
+    border-radius: 28px;
+    box-shadow: 0 16px 48px rgba(224,87,128,0.18);
+    padding: 48px 40px;
+    max-width: 520px;
+    width: 100%;
+    animation: rise .8s ease both;
+  }
+  @keyframes rise{
+    from{ opacity:0; transform: translateY(40px) scale(.96); }
+    to{   opacity:1; transform: translateY(0)    scale(1);    }
+  }
+
+  .big-heart{
+    font-size: 72px;
+    display:block;
+    margin-bottom: 20px;
+    animation: pulse 1.6s ease-in-out infinite;
+  }
+  @keyframes pulse{
+    0%,100%{ transform: scale(1);    }
+    50%{     transform: scale(1.12); }
+  }
+
+  .miss-text{
+    font-size: clamp(36px, 10vw, 72px);
+    font-weight: 800;
+    letter-spacing: .02em;
+    background: linear-gradient(135deg, var(--pink-deep), var(--pink-dark));
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+    line-height: 1.1;
+    margin-bottom: 10px;
+  }
+
+  .miss-sub{
+    font-size: clamp(15px, 3.5vw, 19px);
+    opacity: .7;
+    margin-top: 10px;
+    line-height: 1.7;
+  }
+
+  .dots{
+    display:flex;
+    justify-content:center;
+    gap:8px;
+    margin-top:28px;
+  }
+  .dot{
+    width:10px; height:10px;
+    border-radius:50%;
+    background: var(--pink-deep);
+    opacity:.4;
+    animation: blink 1.4s ease-in-out infinite;
+  }
+  .dot:nth-child(2){ animation-delay:.2s; }
+  .dot:nth-child(3){ animation-delay:.4s; }
+  @keyframes blink{
+    0%,100%{ opacity:.3; transform:scale(1);   }
+    50%{     opacity:1;  transform:scale(1.35); }
+  }
+</style>
+</head>
+<body>
+
+<div id="hearts"></div>
+
+<div class="page">
+  <div class="card">
+    <span class="big-heart">💗</span>
+    <div class="miss-text">I miss you</div>
+    <p class="miss-sub">more than words can say&nbsp;🥹</p>
+    <div class="dots">
+      <div class="dot"></div>
+      <div class="dot"></div>
+      <div class="dot"></div>
+    </div>
+  </div>
+</div>
+
+<script>
+  const heartsEl = document.getElementById('hearts');
+  const chars = ['💗','💕','💓','💞','🩷'];
+  for(let i=0;i<22;i++){
+    const h = document.createElement('div');
+    h.className = 'heart';
+    h.textContent = chars[Math.floor(Math.random()*chars.length)];
+    h.style.left = Math.random()*100+'vw';
+    h.style.bottom = '-60px';
+    h.style.fontSize = (13+Math.random()*18)+'px';
+    h.style.animationDuration = (7+Math.random()*7)+'s';
+    h.style.animationDelay = (Math.random()*9)+'s';
+    heartsEl.appendChild(h);
+  }
+</script>
+</body>
+</html>
