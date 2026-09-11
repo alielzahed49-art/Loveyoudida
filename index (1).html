@@ -1,0 +1,601 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>هل تحبين علي الزاهد؟</title>
+<style>
+  :root{
+    --pink-bg: #fff0f3;
+    --pink-deep: #ff8fab;
+    --pink-dark: #e05780;
+    --cream: #fffaf5;
+    --text: #5c3a45;
+  }
+  *{box-sizing:border-box;}
+  html,body{
+    margin:0;padding:0;height:100%;
+    font-family:'Segoe UI', Tahoma, sans-serif;
+    background: radial-gradient(circle at 30% 20%, #ffe3ea, var(--pink-bg) 60%);
+    overflow-x:hidden;
+    color:var(--text);
+  }
+  #hearts{
+    position:fixed;inset:0;pointer-events:none;z-index:0;
+  }
+  .heart{
+    position:absolute;
+    font-size:20px;
+    opacity:0.5;
+    animation: float 8s linear infinite;
+    color: var(--pink-deep);
+  }
+  @keyframes float{
+    0%{ transform: translateY(0) rotate(0deg); opacity:0.6;}
+    100%{ transform: translateY(-110vh) rotate(360deg); opacity:0;}
+  }
+
+  .screen{
+    position:relative;
+    z-index:2;
+    display:flex;
+    flex-direction:column;
+    align-items:center;
+    justify-content:center;
+    min-height:100vh;
+    text-align:center;
+    padding:24px;
+  }
+  .hidden{ display:none !important; }
+
+  h1{
+    font-size:clamp(24px, 6vw, 42px);
+    margin-bottom:8px;
+    line-height:1.3;
+  }
+  .name{
+    color:var(--pink-dark);
+  }
+  .subtitle{
+    font-size:16px;
+    opacity:0.75;
+    margin-bottom:40px;
+  }
+
+  .btn-row{
+    position:relative;
+    display:flex;
+    gap:24px;
+    align-items:center;
+    justify-content:center;
+    width:100%;
+    max-width:500px;
+    height:120px;
+  }
+
+  button{
+    border:none;
+    border-radius:999px;
+    padding:16px 36px;
+    font-size:18px;
+    font-weight:600;
+    cursor:pointer;
+    transition: transform .15s ease, box-shadow .15s ease;
+  }
+
+  #yesBtn{
+    background: linear-gradient(135deg, var(--pink-deep), var(--pink-dark));
+    color:#fff;
+    box-shadow: 0 8px 20px rgba(224,87,128,0.35);
+  }
+  #yesBtn:hover{
+    transform: scale(1.08);
+    box-shadow: 0 10px 26px rgba(224,87,128,0.45);
+  }
+  #yesBtn.grow{
+    transform: scale(var(--grow, 1));
+  }
+
+  #noBtn{
+    background:#fff;
+    color: var(--pink-dark);
+    border: 2px solid var(--pink-deep);
+    position:static;
+    transition: left .18s ease, top .18s ease, transform .12s ease;
+  }
+  #noBtn.dodging{
+    position:fixed;
+  }
+
+  /* ---- Result screen ---- */
+  .heart-icon{
+    font-size:60px;
+    margin-bottom:12px;
+    animation: pop .5s ease;
+  }
+  @keyframes pop{
+    0%{ transform: scale(0);}
+    70%{ transform: scale(1.15);}
+    100%{ transform: scale(1);}
+  }
+  #message{
+    max-width:520px;
+    font-size:19px;
+    line-height:1.9;
+    background:var(--cream);
+    padding:28px 26px;
+    border-radius:20px;
+    box-shadow: 0 10px 30px rgba(224,87,128,0.18);
+    border: 1px solid #ffd6e0;
+  }
+
+  #heartBtn{
+    margin-top:26px;
+    background:none;
+    border:none;
+    font-size:44px;
+    cursor:pointer;
+    animation: pulse 1.4s ease-in-out infinite;
+    padding:0;
+  }
+  #heartBtn:hover{
+    animation-play-state:paused;
+    transform:scale(1.15);
+  }
+  @keyframes pulse{
+    0%,100%{ transform:scale(1); }
+    50%{ transform:scale(1.12); }
+  }
+
+  #extraMsg{
+    margin-top:18px;
+    max-width:480px;
+    min-height:28px;
+    font-size:17px;
+    line-height:1.8;
+    color:var(--pink-dark);
+    font-weight:600;
+    animation: pop .4s ease;
+  }
+
+  #gameToggle{
+    margin-top:30px;
+    background:#fff;
+    color: var(--pink-dark);
+    border: 2px solid var(--pink-deep);
+    border-radius:999px;
+    padding:12px 28px;
+    font-size:15px;
+    font-weight:600;
+    cursor:pointer;
+    transition: transform .15s ease;
+  }
+  #gameToggle:hover{ transform: scale(1.05); }
+
+  #gameSection{
+    margin-top:26px;
+    max-width:520px;
+  }
+  .game-title{
+    font-size:15px;
+    opacity:0.8;
+    margin-bottom:16px;
+  }
+  #cardsGrid{
+    display:grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap:12px;
+  }
+  .flip-card{
+    perspective: 800px;
+    height:90px;
+  }
+  .flip-inner{
+    position:relative;
+    width:100%;
+    height:100%;
+    transition: transform .5s;
+    transform-style: preserve-3d;
+  }
+  .flip-card.flipped .flip-inner{
+    transform: rotateY(180deg);
+  }
+  .flip-front, .flip-back{
+    position:absolute;
+    inset:0;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    border-radius:16px;
+    backface-visibility: hidden;
+    padding:8px;
+    text-align:center;
+  }
+  .flip-front{
+    background: linear-gradient(135deg, var(--pink-deep), var(--pink-dark));
+    color:#fff;
+    font-size:26px;
+    cursor:pointer;
+    box-shadow: 0 6px 16px rgba(224,87,128,0.3);
+  }
+  .flip-back{
+    background:var(--cream);
+    border:1px solid #ffd6e0;
+    color:var(--text);
+    font-size:12.5px;
+    line-height:1.5;
+    transform: rotateY(180deg);
+  }
+  #gameProgress{
+    margin-top:14px;
+    font-size:14px;
+    opacity:0.7;
+  }
+
+  #game2Toggle{
+    margin-top:16px;
+    background:#fff;
+    color: var(--pink-dark);
+    border: 2px solid var(--pink-deep);
+    border-radius:999px;
+    padding:12px 28px;
+    font-size:15px;
+    font-weight:600;
+    cursor:pointer;
+    transition: transform .15s ease;
+  }
+  #game2Toggle:hover{ transform: scale(1.05); }
+
+  #game2Section{
+    margin-top:26px;
+    max-width:520px;
+    width:100%;
+  }
+  #startCatch{
+    background: linear-gradient(135deg, var(--pink-deep), var(--pink-dark));
+    color:#fff;
+    border:none;
+    border-radius:999px;
+    padding:12px 28px;
+    font-size:15px;
+    font-weight:600;
+    cursor:pointer;
+    margin-bottom:14px;
+  }
+  #catchArea{
+    position:relative;
+    width:100%;
+    height:280px;
+    background:var(--cream);
+    border:1px solid #ffd6e0;
+    border-radius:20px;
+    overflow:hidden;
+  }
+  .falling-heart{
+    position:absolute;
+    top:-40px;
+    font-size:28px;
+    cursor:pointer;
+    user-select:none;
+    animation-name: fall;
+    animation-timing-function: linear;
+    animation-fill-mode: forwards;
+  }
+  @keyframes fall{
+    from{ transform: translateY(0); }
+    to{ transform: translateY(320px); }
+  }
+  #catchStatus{
+    margin-top:12px;
+    font-size:15px;
+    font-weight:600;
+    color: var(--pink-dark);
+  }
+</style>
+</head>
+<body>
+
+<div id="hearts"></div>
+
+<!-- شاشة السؤال -->
+<div class="screen" id="questionScreen">
+  <h1>هل تحبين <span class="name">علي الزاهد</span>؟</h1>
+  <p class="subtitle">فكري كويس قبل ما تجاوبي 😌</p>
+
+  <div class="btn-row" id="btnRow">
+    <button id="yesBtn" onclick="showAnswer()">نعم 💗</button>
+    <button id="noBtn">لا</button>
+  </div>
+</div>
+
+<!-- شاشة الإجابة -->
+<div class="screen hidden" id="answerScreen">
+  <div class="heart-icon">💖</div>
+  <div id="message">
+    انا بحبك اوي اوي اوي اوي اوي اوي اوي اوي اوي اوي اوي اوي اوي اوي يا فريدا ولو أنها مجرد اسبوعين إلا أنها من احلي ايام حياتي الي عشتها واتمني تدوم دائما يكوتي
+    <br><br>
+    وبردو بجد مهما عملت مش هقدر اوفي حقك 🥹💗
+  </div>
+
+  <button id="heartBtn" aria-label="اضغطي هنا">💗</button>
+  <div id="extraMsg"></div>
+
+  <button id="gameToggle">🎮 عايزة تلعبي معايا؟</button>
+
+  <div id="gameSection" class="hidden">
+    <p class="game-title">دوسي على أي كارت وشوفي سبب من الأسباب اللي بحبك فيها 🥹</p>
+    <div id="cardsGrid"></div>
+    <p id="gameProgress"></p>
+  </div>
+
+  <button id="game2Toggle">💗 لعبة تانية؟</button>
+
+  <div id="game2Section" class="hidden">
+    <p class="game-title">امسكي أكبر عدد قلوب قبل ما الوقت يخلص 🥹</p>
+    <button id="startCatch">ابدأي 💗</button>
+    <div id="catchArea"></div>
+    <p id="catchStatus"></p>
+  </div>
+</div>
+
+<script>
+  // خلفية القلوب المتساقطة
+  const heartsContainer = document.getElementById('hearts');
+  const heartChars = ['💗','💕','💓','💞','🩷'];
+  for(let i=0;i<18;i++){
+    const h = document.createElement('div');
+    h.className='heart';
+    h.textContent = heartChars[Math.floor(Math.random()*heartChars.length)];
+    h.style.left = Math.random()*100+'vw';
+    h.style.animationDuration = (6+Math.random()*6)+'s';
+    h.style.animationDelay = (Math.random()*8)+'s';
+    h.style.fontSize = (14+Math.random()*18)+'px';
+    heartsContainer.appendChild(h);
+  }
+
+  // منطق زرار "لا" الهارب
+  const noBtn = document.getElementById('noBtn');
+  const yesBtn = document.getElementById('yesBtn');
+  const btnRow = document.getElementById('btnRow');
+  let dodgeCount = 0;
+
+  const hints = [
+    'فكري كويس قبل ما تجاوبي 😌',
+    'ليه بتهربي؟ 👀',
+    'يا ديدا 🥹',
+    'يروحيييي 😭',
+    'ياخرا ليههه💔 😭😭',
+    'مش هتقدري تهربي أكتر من كده 😏',
+    'يا كلبتييي 😡',
+    'يلا بس دوسي نعم 🥺',
+    'يا بتش 😡',
+    'واضح إن الإجابة نعم أصلاً 💗',
+    'إنتِ متأكدة إنك عايزة تدوسي لا؟ 🙄',
+    'حرام عليكي كده 🥹',
+    'خلاص بقى، قلبك عارف الإجابة 💞',
+    'مش هستسلم وهو كمان مش هيستسلم 😄',
+    'يا فريدا يلا بقى 💗'
+  ];
+  const subtitle = document.querySelector('.subtitle');
+
+  function placeNoRandomly(){
+    const btnW = noBtn.offsetWidth;
+    const btnH = noBtn.offsetHeight;
+
+    const maxX = window.innerWidth - btnW - 20;
+    const maxY = window.innerHeight - btnH - 20;
+
+    // منطقة النص (العنوان + الوصف + صف الأزرار) اللي عايزين نتجنبها
+    const textZone = document.querySelector('.screen:not(.hidden)') || document.getElementById('questionScreen');
+    const zoneRect = textZone.getBoundingClientRect();
+    const pad = 16;
+    const zone = {
+      left: zoneRect.left - pad,
+      right: zoneRect.left + Math.min(zoneRect.width, 560) + pad,
+      top: zoneRect.top - pad,
+      bottom: zoneRect.top + (btnRow.getBoundingClientRect().bottom - zoneRect.top) + pad
+    };
+
+    let x, y, tries = 0;
+    do{
+      x = Math.max(10, Math.random()*maxX);
+      y = Math.max(10, Math.random()*maxY);
+      tries++;
+    } while(
+      tries < 30 &&
+      x < zone.right && x + btnW > zone.left &&
+      y < zone.bottom && y + btnH > zone.top
+    );
+
+    noBtn.classList.add('dodging');
+    noBtn.style.left = x+'px';
+    noBtn.style.top = y+'px';
+
+    dodgeCount++;
+    // زرار "نعم" يكبر شوية كل ما "لا" تهرب
+    const grow = Math.min(1 + dodgeCount*0.06, 1.8);
+    yesBtn.style.setProperty('--grow', grow);
+    yesBtn.classList.add('grow');
+
+    // نصايح متغيرة تظهر بعد كذا محاولة
+    subtitle.textContent = hints[Math.min(dodgeCount, hints.length-1)];
+  }
+
+  // على الديسكتوب: يهرب لما الماوس يقرب منه (بعد أول مرة بيبقى ثابت في مكانه الأصلي جنب نعم)
+  noBtn.addEventListener('mouseenter', placeNoRandomly);
+  // على الموبايل: يهرب لما تحاول تدوسي عليه
+  noBtn.addEventListener('touchstart', function(e){
+    e.preventDefault();
+    placeNoRandomly();
+  }, {passive:false});
+  // احتياطي: لو حد قدر يدوس عليه فعلاً
+  noBtn.addEventListener('click', function(e){
+    e.preventDefault();
+    placeNoRandomly();
+  });
+
+  function showAnswer(){
+    document.getElementById('questionScreen').classList.add('hidden');
+    document.getElementById('answerScreen').classList.remove('hidden');
+  }
+
+  // كلام رومانسي بنفس أسلوب الرسالة الأصلية، يتغير كل ما تدوسي على القلب
+  const romanticLines = [
+    'انتي أحلى حاجة حصلتلي في حياتي كلها يا فريدا 🥹💗',
+    'وحشاني اوي اوي اوي اوي اوي اوي اوي 🫶',
+    'كل ثانية معاكي بتبقى أحلى من اللي قبلها يا قمر 🌙💗',
+    'مش هلاقي كلام يوصف قد ايه انتي غالية عليا 🥹',
+    'يا رب دايما تكوني جنبي يا ديدا 💗🥹',
+    'انتي السبب اني بضحك من قلبي بجد 😭💗',
+    'حاسس إني محظوظ اوي اوي اني عرفتك 🥹',
+    'كل يوم بحبك اكتر من اللي قبله والله يا فريدا 💗',
+    'انتي حتة مني دلوقتي، مش قادر اتخيل بدونك 🥹💗',
+    'يكوتي بجد يكوتي، عمري ما حسيت بحاجة زي دي قبل كده 💗'
+  ];
+
+  const heartBtn = document.getElementById('heartBtn');
+  const extraMsg = document.getElementById('extraMsg');
+  let lineIndex = 0;
+
+  heartBtn.addEventListener('click', function(){
+    extraMsg.style.animation = 'none';
+    void extraMsg.offsetWidth; // إعادة تشغيل الأنيميشن
+    extraMsg.style.animation = 'pop .4s ease';
+
+    extraMsg.textContent = romanticLines[lineIndex % romanticLines.length];
+    lineIndex++;
+  });
+
+  // ---- ميني جيم: كروت أسباب حبي ليها ----
+  const reasons = [
+    'بحبك يا كوتي بجد مش عارف اوصفلك اد ايه',
+    'ديدا دي اتعلقت فيها موت والله',
+    'روحي انتي مش بس حبيبتي',
+    'دلوعتي اللي مهما زعلت بترجعلها في ثانية',
+    'قلبي بيهدا لما بسمع صوتك بس',
+    'ديدا بجد اتعلقت فيها اوي واتعلقت موت',
+    'يا كوتي انتي حاجة تانية خالص عني كل الناس',
+    'روحي عمري ما حسيت بالراحة دي مع حد قبلك',
+    'دلوعتي يا رب محدش ياخدك مني'
+  ];
+
+  const gameToggle = document.getElementById('gameToggle');
+  const gameSection = document.getElementById('gameSection');
+  const cardsGrid = document.getElementById('cardsGrid');
+  const gameProgress = document.getElementById('gameProgress');
+  let revealedCount = 0;
+  let gameBuilt = false;
+
+  function buildGame(){
+    reasons.forEach((reason, i) => {
+      const card = document.createElement('div');
+      card.className = 'flip-card';
+      card.innerHTML = `
+        <div class="flip-inner">
+          <div class="flip-front">💗</div>
+          <div class="flip-back">${reason}</div>
+        </div>
+      `;
+      card.addEventListener('click', function(){
+        if(!card.classList.contains('flipped')){
+          card.classList.add('flipped');
+          revealedCount++;
+          updateProgress();
+        }
+      });
+      cardsGrid.appendChild(card);
+    });
+    updateProgress();
+    gameBuilt = true;
+  }
+
+  function updateProgress(){
+    if(revealedCount === 0){
+      gameProgress.textContent = `فتحي كل الكروت (0/${reasons.length}) 🥹`;
+    } else if(revealedCount < reasons.length){
+      gameProgress.textContent = `${revealedCount}/${reasons.length} 💗 كملي...`;
+    } else {
+      gameProgress.textContent = 'دي كل الأسباب... وفيه آلاف غيرها يا فريدا 🥹💗';
+    }
+  }
+
+  gameToggle.addEventListener('click', function(){
+    if(!gameBuilt) buildGame();
+    gameSection.classList.toggle('hidden');
+    gameToggle.textContent = gameSection.classList.contains('hidden')
+      ? '🎮 عايزة تلعبي معايا؟'
+      : '🙈 اخفي اللعبة';
+  });
+
+  // ---- ميني جيم 2: اصطياد القلوب ----
+  const game2Toggle = document.getElementById('game2Toggle');
+  const game2Section = document.getElementById('game2Section');
+  const startCatch = document.getElementById('startCatch');
+  const catchArea = document.getElementById('catchArea');
+  const catchStatus = document.getElementById('catchStatus');
+
+  let catchScore = 0;
+  let catchTimeLeft = 20;
+  let catchTimerId = null;
+  let spawnTimerId = null;
+  let catchRunning = false;
+
+  game2Toggle.addEventListener('click', function(){
+    game2Section.classList.toggle('hidden');
+    game2Toggle.textContent = game2Section.classList.contains('hidden')
+      ? '💗 لعبة تانية؟'
+      : '🙈 اخفي اللعبة';
+  });
+
+  function spawnHeart(){
+    const heart = document.createElement('div');
+    heart.className = 'falling-heart';
+    heart.textContent = ['💗','💕','💓','🩷'][Math.floor(Math.random()*4)];
+    const areaWidth = catchArea.clientWidth;
+    heart.style.left = Math.max(0, Math.random()*(areaWidth-28)) + 'px';
+    const duration = 2.4 + Math.random()*1.6;
+    heart.style.animationDuration = duration + 's';
+
+    heart.addEventListener('click', function(){
+      if(!catchRunning) return;
+      catchScore++;
+      catchStatus.textContent = `النقط: ${catchScore} 💗`;
+      heart.remove();
+    });
+    heart.addEventListener('animationend', function(){
+      heart.remove();
+    });
+    catchArea.appendChild(heart);
+  }
+
+  startCatch.addEventListener('click', function(){
+    if(catchRunning) return;
+    catchRunning = true;
+    catchScore = 0;
+    catchTimeLeft = 20;
+    catchArea.innerHTML = '';
+    catchStatus.textContent = `النقط: 0 💗 | الوقت: ${catchTimeLeft}`;
+    startCatch.disabled = true;
+
+    spawnTimerId = setInterval(spawnHeart, 550);
+    catchTimerId = setInterval(function(){
+      catchTimeLeft--;
+      catchStatus.textContent = `النقط: ${catchScore} 💗 | الوقت: ${catchTimeLeft}`;
+      if(catchTimeLeft <= 0){
+        clearInterval(catchTimerId);
+        clearInterval(spawnTimerId);
+        catchRunning = false;
+        startCatch.disabled = false;
+        catchArea.innerHTML = '';
+        let finalMsg = `خلصتي بـ ${catchScore} قلب 💗`;
+        if(catchScore > 10) finalMsg += ' شطورتيييييي امواح 😘💗';
+        if(catchScore >= 15) finalMsg += ' وده عدد القلوب اللي بحبك بيها بالظبط يا ديدا 🥹';
+        else finalMsg += ' يلا كمان مرة يا كوتي 🥹';
+        catchStatus.textContent = finalMsg;
+      }
+    }, 1000);
+  });
+</script>
+
+</body>
+</html>
